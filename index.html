@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SNIPER SIGNEL APP - PREMIUM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Container Settings */
+        .app-container {
+            background-color: #1e1e24;
+            border: 1px solid #2a2a35;
+            border-radius: 20px;
+            padding: 30px 25px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            display: none; 
+            animation: fadeIn 0.5s ease-in-out;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* NEW: Error Note Card (Toast Notification) */
+        .error-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px); /* Hidden above screen */
+            background: rgba(30, 30, 36, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #ef4444;
+            border-left: 5px solid #ef4444;
+            color: #fff;
+            padding: 16px 20px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.3);
+            z-index: 2000;
+            opacity: 0;
+            width: 90%;
+            max-width: 400px;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); /* Bouncy effect */
+        }
+
+        .error-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .error-toast i {
+            color: #ef4444;
+            font-size: 24px;
+        }
+
+        .error-toast .error-content {
+            text-align: left;
+        }
+
+        .error-toast h4 {
+            margin: 0;
+            font-size: 15px;
+            color: #ef4444;
+            letter-spacing: 0.5px;
+        }
+
+        .error-toast p {
+            margin: 3px 0 0 0;
+            font-size: 13px;
+            color: #e0e0e0;
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 4px solid #2a2a35;
+            border-top: 4px solid #f3c623; 
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header h1 { color: #f3c623; font-size: 26px; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; }
+        .header p { color: #9e9ea7; font-size: 13px; margin-bottom: 25px; font-weight: 500; }
+
+        /* Profile Header */
+        .profile-header {
+            background-color: #25252d; border: 1px solid #363640; padding: 12px 15px;
+            border-radius: 12px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 20px;
+        }
+        .user-info { display: flex; align-items: center; gap: 10px; color: #10b981; font-weight: 600; font-size: 15px; }
+        .user-info i { font-size: 20px; color: #f3c623; }
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444;
+            padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.3s;
+        }
+        .logout-btn:hover { background: #ef4444; color: #fff; }
+
+        /* Input Fields */
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; color: #b3b3b3; font-size: 14px; margin-bottom: 8px; font-weight: 500; }
+        .input-group input {
+            width: 100%; padding: 14px; background-color: #121212; border: 1px solid #333;
+            border-radius: 10px; color: #fff; font-size: 18px; text-align: center;
+            outline: none; transition: 0.3s; font-weight: 600;
+        }
+        .input-group input:focus { border-color: #f3c623; box-shadow: 0 0 10px rgba(243, 198, 35, 0.1); }
+
+        /* Main Buttons */
+        .main-btn {
+            width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: #fff;
+            border: none; padding: 16px; font-size: 18px; font-weight: 600; border-radius: 10px;
+            cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; margin-bottom: 10px;
+        }
+        .main-btn:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+        }
+        
+        .status { font-size: 14px; height: 20px; margin-bottom: 15px; font-weight: 500; }
+
+        /* Signals Grid */
+        .signals-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px; margin-bottom: 20px; }
+        .signal-card {
+            background-color: #25252d; border: 1px solid #363640; border-radius: 12px;
+            padding: 15px 10px; text-align: center; display: none; flex-direction: column; justify-content: space-between;
+        }
+        .signal-card.show { display: flex; animation: fadeIn 0.5s ease-in-out; }
+        .signal-time { font-size: 13px; color: #9e9ea7; margin-bottom: 8px; }
+        .signal-odd { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+        .signal-accuracy {
+            font-size: 12px; color: #10b981; font-weight: 600;
+            background: rgba(16, 185, 129, 0.1); padding: 4px 10px; border-radius: 20px; display: inline-block;
+        }
+
+        /* Copy & Telegram Buttons */
+        .copy-all-btn {
+            width: 100%; background-color: transparent; border: 2px solid #10b981;
+            color: #10b981; padding: 14px; font-size: 16px; font-weight: 600;
+            border-radius: 10px; cursor: pointer; transition: 0.3s; display: none; margin-bottom: 15px;
+        }
+        .copy-all-btn:hover { background-color: #10b981; color: #fff; }
+
+        .tg-main-btn {
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+            width: 100%; background: linear-gradient(135deg, #0088cc, #005580);
+            color: #fff; text-decoration: none; padding: 14px; font-size: 15px;
+            font-weight: 700; border-radius: 10px; transition: all 0.3s ease;
+            margin-bottom: 25px; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .tg-main-btn:hover {
+            transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 136, 204, 0.4);
+            background: linear-gradient(135deg, #0099e6, #006699);
+        }
+
+        /* Telegram Alert Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); display: none; align-items: center;
+            justify-content: center; z-index: 1000; backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: #1e1e24; border: 1px solid #363640; border-radius: 20px;
+            padding: 30px; width: 90%; max-width: 380px; text-align: center;
+            position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); animation: modalPop 0.4s ease-out;
+        }
+        @keyframes modalPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .close-modal {
+            position: absolute; top: 15px; right: 20px; background: none; border: none;
+            color: #9e9ea7; font-size: 24px; cursor: pointer; transition: 0.3s;
+        }
+        .close-modal:hover { color: #ef4444; }
+        .modal-icon { font-size: 50px; color: #0088cc; margin-bottom: 15px; }
+        .tg-join-btn {
+            display: inline-block; width: 100%; background: #0088cc; color: #fff;
+            padding: 14px; border-radius: 10px; text-decoration: none; font-weight: 700;
+            font-size: 16px; letter-spacing: 1px; transition: 0.3s;
+        }
+        .tg-join-btn:hover { background: #0077b3; transform: scale(1.02); }
+
+        /* Promo Section */
+        .promo-section { border-top: 1px solid #2a2a35; padding-top: 20px; }
+        .promo-toggle-btn {
+            width: 100%; background-color: #2c2c35; color: #e0e0e0;
+            border: 1px solid #3d3d4a; padding: 14px; font-size: 15px; font-weight: 600;
+            border-radius: 10px; cursor: pointer; transition: 0.3s;
+        }
+        .promo-grid { display: none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .promo-grid.active { display: grid; animation: fadeIn 0.4s ease; }
+        .promo-box { background-color: #1a1a20; border: 1px solid #2a2a35; padding: 12px; border-radius: 12px; text-align: center; }
+        .promo-box:last-child:nth-child(odd) { grid-column: span 2; }
+        .site-name { display: block; color: #9e9ea7; font-size: 12px; margin-bottom: 5px; text-transform: uppercase; }
+        .site-code { display: block; color: #f3c623; font-size: 15px; font-weight: 700; }
+
+    </style>
+</head>
+<body>
+
+    <!-- ERROR NOTE CARD (TOAST) -->
+    <div class="error-toast" id="errorToast">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div class="error-content">
+            <h4>System Error</h4>
+            <p id="errorMessage">Error details here</p>
+        </div>
+    </div>
+
+    <!-- TELEGRAM NOTICE ALERT (Modal) -->
+    <div class="modal-overlay" id="tgAlertModal">
+        <div class="modal-box">
+            <button class="close-modal" onclick="closeAlert()">✖</button>
+            <i class="fab fa-telegram-plane modal-icon"></i>
+            <h2>Important Notice</h2>
+            <p>Join Now Telegram Free Signel Chanel And Tricks</p>
+            <a href="https://t.me/Sniper_Signel_Room" target="_blank" class="tg-join-btn">
+                <i class="fas fa-paper-plane"></i> JOIN NOW
+            </a>
+        </div>
+    </div>
+
+    <!-- 1. LOADING SCREEN -->
+    <div class="app-container" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="header">
+            <h1>SYSTEM LOADING</h1>
+            <p>Establishing secure connection...</p>
+        </div>
+    </div>
+
+    <!-- 2. LOGIN SCREEN -->
+    <div class="app-container" id="loginScreen">
+        <div class="header">
+            <h1>SECURE LOGIN</h1>
+            <p>Authorized Personnel Only</p>
+        </div>
+
+        <div class="input-group">
+            <label for="usernameInput">Game ID (Numbers Only - Min 9 digits)</label>
+            <input type="text" id="usernameInput" placeholder="e.g. 123456789">
+        </div>
+
+        <div class="input-group">
+            <label for="passwordInput">VIP Password</label>
+            <input type="password" id="passwordInput" placeholder="Enter Password">
+        </div>
+
+        <button class="main-btn" onclick="processLogin()" id="loginBtn">LOG IN</button>
+        <div class="status" id="loginStatusText"></div>
+    </div>
+
+    <!-- 3. MAIN APP SCREEN -->
+    <div class="app-container" id="mainAppScreen">
+        
+        <div class="profile-header">
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span id="displayGameId">ID: Loading...</span>
+            </div>
+            <button class="logout-btn" onclick="logoutApp()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+
+        <div class="header">
+            <h1>SNIPER SIGNEL APP</h1>
+        </div>
+
+        <div class="input-group">
+            <label for="highOddInput">Enter Chart Highest Odd (e.g. 15.42)</label>
+            <input type="number" id="highOddInput" placeholder="0.00" step="0.01">
+        </div>
+
+        <button class="main-btn" id="generateBtn" onclick="generateSignals()">Find Signals</button>
+        <div class="status" id="statusText"></div>
+
+        <div class="signals-container" id="signalsOutput"></div>
+
+        <button class="copy-all-btn" id="copyAllBtn" onclick="copyAllSignals()">
+            <i class="fas fa-copy"></i> Copy All Signals
+        </button>
+
+        <a href="https://t.me/Sniper_Signel_Room" target="_blank" class="tg-main-btn">
+            <i class="fab fa-telegram-plane"></i> JOIN TELEGRAM CHANNEL
+        </a>
+
+        <div class="promo-section">
+            <button class="promo-toggle-btn" onclick="togglePromo()">
+                <i class="fas fa-gift"></i> View VIP Promo Codes
+            </button>
+            <div class="promo-grid" id="promoList">
+                <div class="promo-box"><span class="site-name">888Starz</span><span class="site-code">PV8</span></div>
+                <div class="promo-box"><span class="site-name">DBBET</span><span class="site-code">VIPBOS</span></div>
+                <div class="promo-box"><span class="site-name">Luckypari</span><span class="site-code">PV8</span></div>
+                <div class="promo-box"><span class="site-name">Megapari</span><span class="site-code">PV8</span></div>
+                <div class="promo-box"><span class="site-name">1xbet</span><span class="site-code">VIDUBOY</span></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSignalsData = [];
+        let errorTimeout;
+
+        // --- NEW: ERROR NOTE CARD FUNCTION ---
+        function showErrorCard(message) {
+            const toast = document.getElementById('errorToast');
+            const msgEl = document.getElementById('errorMessage');
+            
+            msgEl.innerText = message;
+            toast.classList.add('show');
+            
+            // කලින් Error එකක් තියෙනවා නම් ඒක clear කරලා අලුත් එක දාන්න
+            clearTimeout(errorTimeout);
+            
+            errorTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3500); // තත්පර 3.5 කින් Error එක මැකී යයි
+        }
+
+        // --- ON LOAD SYSTEM ---
+        window.onload = function() {
+            document.getElementById('loadingScreen').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.display = 'none';
+                
+                if(localStorage.getItem('sniperLoggedIn') === 'true') {
+                    const savedId = localStorage.getItem('sniperGameId');
+                    showMainApp(savedId, false);
+                } else {
+                    document.getElementById('loginScreen').style.display = 'block';
+                }
+            }, 2000);
+        };
+
+        // --- LOGIN SYSTEM ---
+        function processLogin() {
+            const username = document.getElementById('usernameInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
+            const statusText = document.getElementById('loginStatusText');
+            const loginBtn = document.getElementById('loginBtn');
+            const isNumberOnly = /^\d+$/.test(username);
+
+            // හිස්ව ඇති විට Error Card
+            if(username === "" || password === "") {
+                showErrorCard("කරුණාකර Username හා Password ලබා දෙන්න!"); return;
+            }
+            // වැරදි ID එකක් දෙන විට Error Card
+            if(!isNumberOnly || username.length <= 8) {
+                showErrorCard("Game ID එකට අංක 9ක් හෝ ඊට වැඩි ගණනක් ලබා දෙන්න. අකුරු භාවිතා කළ නොහැක!"); return;
+            }
+            // වැරදි Password දෙන විට Error Card
+            if(password !== "SNIPERSI23$A") {
+                showErrorCard("ඔබ ඇතුලත් කළ Password එක වැරදියි!"); return;
+            }
+
+            statusText.style.color = "#10b981"; 
+            statusText.innerText = "Login Successful! Redirecting...";
+            loginBtn.disabled = true;
+
+            localStorage.setItem('sniperLoggedIn', 'true');
+            localStorage.setItem('sniperGameId', username);
+
+            setTimeout(() => {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('loadingScreen').style.display = 'block';
+                
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    showMainApp(username, true); 
+                }, 1500);
+            }, 1000);
+        }
+
+        // --- LOGOUT SYSTEM ---
+        function logoutApp() {
+            localStorage.setItem('sniperLoggedIn', 'false'); 
+            document.getElementById('mainAppScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('passwordInput').value = ""; 
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginStatusText').innerText = "";
+        }
+
+        // --- MAIN APP DISPLAY ---
+        function showMainApp(gameId, showAlert) {
+            document.getElementById('mainAppScreen').style.display = 'block';
+            document.getElementById('displayGameId').innerText = "ID: " + gameId;
+            
+            if(showAlert) { document.getElementById('tgAlertModal').style.display = 'flex'; }
+
+            const savedSignals = localStorage.getItem('sniperSavedSignals');
+            if(savedSignals) {
+                currentSignalsData = JSON.parse(savedSignals);
+                renderSavedSignals();
+            }
+        }
+
+        function closeAlert() { document.getElementById('tgAlertModal').style.display = 'none'; }
+
+        // --- SIGNAL GENERATION ---
+        function formatTime(date) {
+            let hours = date.getHours(); let minutes = date.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12; hours = hours ? hours : 12; 
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        function generateSignals() {
+            const highOdd = document.getElementById('highOddInput').value;
+            const btn = document.getElementById('generateBtn');
+            const statusText = document.getElementById('statusText');
+            const signalsOutput = document.getElementById('signalsOutput');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+
+            // වැරදි Odd එකක් ඇතුලත් කළ විට Error Card පෙන්වීම
+            if (!highOdd || highOdd <= 0) {
+                showErrorCard("කරුණාකර නිවැරදි Odd අගයක් ඇතුලත් කරන්න!"); return;
+            }
+
+            btn.disabled = true;
+            statusText.style.color = "#9e9ea7";
+            statusText.innerText = "Analyzing Market Data...";
+            signalsOutput.innerHTML = ""; 
+            copyAllBtn.style.display = "none";
+            currentSignalsData = []; 
+
+            setTimeout(() => {
+                statusText.style.color = "#10b981";
+                statusText.innerText = "Signals Ready!";
+                
+                let currentTime = new Date();
+                let timeOffset = 1; 
+
+                for (let i = 0; i < 4; i++) {
+                    let randomOdd = (Math.random() * (5.50 - 2.05) + 2.05).toFixed(2);
+                    let accuracy = Math.floor(Math.random() * (98 - 88 + 1)) + 88;
+                    let signalTime = new Date(currentTime.getTime() + timeOffset * 60000);
+                    let formattedTime = formatTime(signalTime);
+                    timeOffset += Math.floor(Math.random() * 3) + 1; 
+
+                    currentSignalsData.push({ time: formattedTime, odd: randomOdd, accuracy: accuracy });
+                }
+                
+                localStorage.setItem('sniperSavedSignals', JSON.stringify(currentSignalsData));
+                renderSavedSignals(); 
+
+                setTimeout(() => {
+                    btn.disabled = false;
+                    statusText.innerText = "Ready for next entry.";
+                }, 1500);
+            }, 1500);
+        }
+
+        function renderSavedSignals() {
+            const signalsOutput = document.getElementById('signalsOutput');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            signalsOutput.innerHTML = ""; 
+
+            currentSignalsData.forEach((data, i) => {
+                let cardHTML = `
+                    <div class="signal-card show" id="card-${i}">
+                        <div class="signal-time"><i class="far fa-clock"></i> ${data.time}</div>
+                        <div class="signal-odd">${data.odd}x</div>
+                        <div class="signal-accuracy">${data.accuracy}% Safe</div>
+                    </div>
+                `;
+                signalsOutput.innerHTML += cardHTML;
+            });
+            copyAllBtn.style.display = "block";
+        }
+
+        // --- COPY ALL SIGNALS ---
+        function copyAllSignals() {
+            const btn = document.getElementById('copyAllBtn');
+            let copyText = "🎯 *SNIPER SIGNAL APP* 🎯\n\n";
+            currentSignalsData.forEach((sig, index) => {
+                copyText += `⚡ Signal ${index + 1}\n⏰ Time: ${sig.time}\n🚀 Odd: ${sig.odd}x\n✅ Safe: ${sig.accuracy}%\n\n`;
+            });
+            copyText += "💸 Play Safe & Win Big!";
+
+            const textArea = document.createElement("textarea");
+            textArea.value = copyText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = `<i class="fas fa-check"></i> Copied Successfully!`;
+                btn.style.backgroundColor = "#10b981"; btn.style.color = "#fff";
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.backgroundColor = "transparent"; btn.style.color = "#10b981";
+                }, 2500);
+            } catch (err) { showErrorCard("Error copying text."); }
+            document.body.removeChild(textArea);
+        }
+
+        // --- PROMO SECTION ---
+        function togglePromo() { document.getElementById('promoList').classList.toggle('active'); }
+    </script>
+</body>
+</html>
